@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Koolstraweb — Werkplaats Tools</title>
+<meta name="description" content="Handige calculators voor in de werkplaats. Gratis, geen app nodig.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #f0f0f0;
+  --surface: #ffffff;
+  --border:  #d8d8d8;
+  --wood:    #4a6fa5;
+  --wood2:   #2d4e7e;
+  --accent:  #2d4e7e;
+  --accent2: #6b8cba;
+  --text:    #1a2332;
+  --muted:   #7a8a9a;
+  --dim:     #4a6fa5;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── GRAIN OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.3;
+}
+
+/* ── WOOD GRAIN LINES ── */
+.grain-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.grain-bg::after {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: repeating-linear-gradient(
+    92deg,
+    transparent,
+    transparent 60px,
+    rgba(74,111,165,0.03) 60px,
+    rgba(74,111,165,0.03) 61px
+  );
+  transform: rotate(-3deg);
+}
+
+/* ── HEADER ── */
+header {
+  position: relative;
+  z-index: 10;
+  padding: 60px 24px 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.logo-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(52px, 10vw, 96px);
+  letter-spacing: 4px;
+  line-height: 1;
+  color: var(--text);
+}
+
+.logo span {
+  color: var(--wood);
+}
+
+.tagline {
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 32px;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--wood2), transparent);
+  margin-bottom: 48px;
+}
+
+/* ── INTRO ── */
+.intro {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.8;
+  max-width: 480px;
+  margin-bottom: 56px;
+}
+
+.intro strong {
+  color: var(--text);
+}
+
+/* ── TOOLS GRID ── */
+main {
+  position: relative;
+  z-index: 10;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+.section-label {
+  font-size: 9px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 2px;
+  margin-bottom: 60px;
+}
+
+/* ── TOOL CARD ── */
+.tool-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 28px 24px;
+  text-decoration: none;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.2s, transform 0.2s;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.tool-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--wood);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.tool-card:hover {
+  border-color: var(--wood);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(45,78,126,0.1);
+}
+
+.tool-card:hover::before {
+  transform: scaleX(1);
+}
+
+.tool-number {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--muted);
+}
+
+.tool-icon {
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.tool-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 3px;
+  line-height: 1;
+  color: var(--text);
+}
+
+.tool-name span {
+  color: var(--accent);
+}
+
+.tool-desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.7;
+  flex: 1;
+}
+
+.tool-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.tag {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 2px;
+}
+
+.tool-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.tool-cta-text {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--wood);
+}
+
+.tool-cta-arrow {
+  font-size: 16px;
+  color: var(--wood);
+  transition: transform 0.2s;
+}
+
+.tool-card:hover .tool-cta-arrow {
+  transform: translateX(4px);
+}
+
+/* ── FEATURED CARD ── */
+.tool-card.featured {
+  border-color: var(--wood);
+  background: linear-gradient(135deg, #ffffff, #f0f4f9);
+}
+
+.tool-card.featured .tool-name span {
+  color: var(--wood2);
+}
+
+.badge {
+  position: absolute;
+  top: 12px; right: 12px;
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  background: var(--wood2);
+  color: #fff;
+  border-radius: 2px;
+  font-weight: bold;
+}
+
+/* ── INSTALL STRIP ── */
+.install-strip {
+  border: 1px solid var(--border);
+  background: #e8edf4;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+}
+
+.install-icon { font-size: 24px; flex-shrink: 0; }
+
+.install-text {
+  flex: 1;
+  min-width: 200px;
+}
+
+.install-title {
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+
+.install-sub {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ── FOOTER ── */
+footer {
+  position: relative;
+  z-index: 10;
+  border-top: 1px solid var(--border);
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-brand {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: var(--muted);
+}
+
+.footer-brand span { color: var(--wood); }
+
+.footer-note {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+header { animation: fadeUp 0.6s ease both; }
+.tool-card:nth-child(1) { animation: fadeUp 0.5s 0.1s ease both; }
+.tool-card:nth-child(2) { animation: fadeUp 0.5s 0.2s ease both; }
+.tool-card:nth-child(3) { animation: fadeUp 0.5s 0.3s ease both; }
+.install-strip { animation: fadeUp 0.5s 0.4s ease both; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 480px) {
+  header { padding: 40px 20px 32px; }
+  main { padding: 0 20px 60px; }
+  .tools-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="grain-bg"></div>
+
+<header>
+  <div class="logo-row">
+    <div class="logo">KOOLSTRA<span>WEB</span></div>
+  </div>
+  <div class="tagline">Werkplaats tools — gratis, altijd bij de hand</div>
+  <div class="divider"></div>
+  <p class="intro">
+    Drie <strong>handige calculators</strong> voor houtwerkers en makers.
+    Geen app nodig — open ze in je browser en zet ze op je beginscherm.
+    Werkt ook <strong>offline</strong> in de werkplaats.
+  </p>
+</header>
+
+<main>
+  <div class="section-label">— tools</div>
+
+  <div class="tools-grid">
+
+    <!-- FrameCalc -->
+    <a class="tool-card featured" href="https://wibo63.github.io/FrameCalc/" target="_blank">
+      <div class="badge">Nieuw</div>
+      <div class="tool-number">01 / 03</div>
+      <div class="tool-icon">🖼</div>
+      <div class="tool-name">FRAME<span>CALC</span></div>
+      <div class="tool-desc">
+        Bereken zaagmaten voor schilderijlijsten op 45° verstek.
+        Voer werkafmetingen in, krijg direct de korte en lange punt
+        voor elk stuk — inclusief printvelletje voor de werkplaats.
+      </div>
+      <div class="tool-tags">
+        <span class="tag">Verstek</span>
+        <span class="tag">45°</span>
+        <span class="tag">Inkeping</span>
+        <span class="tag">Print</span>
+      </div>
+      <div class="tool-cta">
+        <span class="tool-cta-text">Openen</span>
+        <span class="tool-cta-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- Zaagplanner -->
+    <a class="tool-card" href="https://wibo63.github.io/zaagplanner/" target="_blank">
+      <div class="tool-number">02 / 03</div>
+      <div class="tool-icon">🪚</div>
+      <div class="tool-name">ZAAG<span>PLANNER</span></div>
+      <div class="tool-desc">
+        Optimaliseer je zaaglijst voor plaatmateriaal.
+        Voer je benodigde stukken in en zie direct hoe ze
+        het meest efficiënt uit een plaat komen — minimaal afval.
+      </div>
+      <div class="tool-tags">
+        <span class="tag">Plaatmateriaal</span>
+        <span class="tag">Optimalisatie</span>
+        <span class="tag">Afval</span>
+      </div>
+      <div class="tool-cta">
+        <span class="tool-cta-text">Openen</span>
+        <span class="tool-cta-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- Omrekentool -->
+    <a class="tool-card" href="https://wibo63.github.io/converter/" target="_blank">
+      <div class="tool-number">03 / 03</div>
+      <div class="tool-icon">📐</div>
+      <div class="tool-name">OMREKEN<span>TOOL</span></div>
+      <div class="tool-desc">
+        Snel schakelen tussen inches en millimeters.
+        Handige tabel met gangbare houtmaten en
+        breuken — tap een maat voor directe omrekening.
+      </div>
+      <div class="tool-tags">
+        <span class="tag">Inches</span>
+        <span class="tag">Millimeters</span>
+        <span class="tag">Houtmaten</span>
+      </div>
+      <div class="tool-cta">
+        <span class="tool-cta-text">Openen</span>
+        <span class="tool-cta-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- Install strip -->
+  <div class="install-strip">
+    <div class="install-icon">📲</div>
+    <div class="install-text">
+      <div class="install-title">Installeer als app</div>
+      <div class="install-sub">
+        Open een tool in Safari → Deel → "Zet op beginscherm" — werkt als een echte app, ook zonder wifi.
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-brand">KOOLSTRA<span>WEB</span></div>
+  <div class="footer-note">Gemaakt met liefde voor de werkplaats</div>
+</footer>
+
+</body>
+</html>
